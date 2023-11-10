@@ -10,6 +10,7 @@ typedef struct Zaznam {
     double hod;
     char cas[5];
     int datum;
+    char datumCas[20];
     struct Zaznam *dalsi; // Ukazovateľ na ďalší záznam
 } Zaznam;
 
@@ -31,6 +32,7 @@ void nacitanie(FILE **dataloger, Zaznam **zaz, int *pocet_zaznamov) {
         if (fscanf(*dataloger, "%5s %16s %2s %lf %4s %d",
                    akt->id, akt->poz, akt->typ,
                    &akt->hod, akt->cas, &akt->datum) == 6) {
+            sprintf(akt->datumCas, "%d%s", akt->datum, akt->cas);
             akt->dalsi = NULL;
             if (posledny != NULL) {
                 posledny->dalsi = akt;
@@ -56,7 +58,7 @@ void vypis_zaznamov(Zaznam *zaz) {
         printf("ID: %s\t%s\t%2lf\n", akt->id, akt->typ, akt->hod);
         printf("Poz: %.8s\t%.8s\n", akt->poz, akt->poz + 8);
         printf("DaC: %d\t%s\n", akt->datum, akt->cas);
-
+        printf("%s\n", akt->datumCas);
         akt = akt->dalsi;
         index++;
     }
@@ -93,7 +95,7 @@ void novy_zaznam(Zaznam **zaz, int *pocet_zaznamov) {
     printf("Nový záznam bol vytvorený\n");
 }
 
-void vymaz_zaznamov(Zaznam **zaz, int *pocet_zaznam) 
+void vymaz_zaznamov(Zaznam **zaz, int *pocet_zaznamov) 
 {
     char id[6];
     scanf("%5s", id);
@@ -111,7 +113,7 @@ void vymaz_zaznamov(Zaznam **zaz, int *pocet_zaznam)
             akt = akt->dalsi;
 
             free(pam);
-            (*pocet_zaznam)--;
+            (*pocet_zaznamov)--;
 
             printf("Zaznam pre ID: %s bol vymazany.\n", id);
             continue;
@@ -121,6 +123,54 @@ void vymaz_zaznamov(Zaznam **zaz, int *pocet_zaznam)
     }
 
 }
+
+Zaznam* spojenie(Zaznam *prvy, Zaznam *druhy) {
+    if (prvy == NULL) return druhy;
+    if (druhy == NULL) return prvy;
+    if (strcmp(prvy->datumCas, druhy->datumCas) < 0){
+        prvy->dalsi = spojenie(prvy->dalsi, druhy);
+        return prvy;
+    }
+    else{
+        druhy->dalsi = spojenie(prvy, druhy->dalsi);
+        return druhy;
+    }
+}
+
+Zaznam* oddelenie(Zaznam *akt){
+    Zaznam *fast = akt;
+    Zaznam *slow = akt;
+    Zaznam *temp = NULL;
+    while (fast != NULL && fast->dalsi != NULL){
+        fast = fast->dalsi->dalsi;
+        temp = slow;
+        slow = slow->dalsi;
+    }
+    if (temp != NULL){
+        temp->dalsi = NULL;
+    }
+    return slow;
+}
+
+Zaznam* usporiadanie(Zaznam *akt) {
+    if (akt == NULL || akt->dalsi == NULL){
+        return akt;
+    }
+    Zaznam* druhy = oddelenie(akt);
+    akt = usporiadanie(akt);
+    druhy = usporiadanie(druhy);
+
+    return spojenie(akt, druhy);
+}
+
+
+void usporiadanie_zaznamov(Zaznam **zaz, int *pocet_zaznamov){
+    if (zaz != NULL && *zaz != NULL){
+        *zaz = usporiadanie(*zaz);
+        printf("Zaznamov bol usporiadane.\n");
+    }
+}
+
 
 void uvolnit_zaznamy(Zaznam **zaz) {
     Zaznam *akt;
@@ -152,6 +202,9 @@ int main() {
                 break;
             case 'z':
                 vymaz_zaznamov(&zaz, &pocet_zaznamov);
+                break;
+            case 'u':
+                usporiadanie_zaznamov(&zaz, &pocet_zaznamov);
                 break;
             case '0':
                 uvolnit_zaznamy(&zaz);
