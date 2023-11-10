@@ -72,12 +72,6 @@ void novy_zaznam(Zaznam **zaz, int *pocet_zaznamov) {
     int prov = 0;
     Zaznam *novyZaznam = (Zaznam *)malloc(sizeof(Zaznam));
     scanf("%5s %16s %2s %lf %4s %d", novyZaznam->id, novyZaznam->poz, novyZaznam->typ, &novyZaznam->hod, novyZaznam->cas, &novyZaznam->datum);
-    printf("%s\n", novyZaznam->id);
-    printf("%s\n", novyZaznam->poz);
-    printf("%s\n", novyZaznam->typ);
-    printf("%lf\n", novyZaznam->hod);
-    printf("%s\n", novyZaznam->cas);
-    printf("%d\n", novyZaznam->datum);
     novyZaznam->dalsi = NULL;
     if (miesto == 1) {
         novyZaznam->dalsi = *zaz;
@@ -97,6 +91,35 @@ void novy_zaznam(Zaznam **zaz, int *pocet_zaznamov) {
     }
     (*pocet_zaznamov)++;
     printf("Nový záznam bol vytvorený\n");
+}
+
+void vymaz_zaznamov(Zaznam **zaz, int *pocet_zaznam) 
+{
+    char id[6];
+    scanf("%5s", id);
+    Zaznam *akt = *zaz;
+    Zaznam *pred = NULL;
+    while (akt!= NULL) {
+        if (strcmp(akt->id, id) == 0) {
+            if (pred == NULL) {
+                *zaz = akt->dalsi;
+            }
+            else {
+                pred->dalsi = akt->dalsi;
+            }
+            Zaznam *pam = akt;
+            akt = akt->dalsi;
+
+            free(pam);
+            (*pocet_zaznam)--;
+
+            printf("Zaznam pre ID: %s bol vymazany.\n", id);
+            continue;
+        }
+        pred = akt;
+        akt = akt->dalsi;
+    }
+
 }
 
 void uvolnit_zaznamy(Zaznam **zaz) {
@@ -126,6 +149,9 @@ int main() {
                 break;
             case 'p':
                 novy_zaznam(&zaz, &pocet_zaznamov);
+                break;
+            case 'z':
+                vymaz_zaznamov(&zaz, &pocet_zaznamov);
                 break;
             case '0':
                 uvolnit_zaznamy(&zaz);
