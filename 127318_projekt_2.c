@@ -62,32 +62,42 @@ void vypis_zaznamov(Zaznam *zaz) {
     }
 }
 
-// void novy_zaznam(Zaznam **zaz, int *pocet_zaznamov) {
-//     int miesto;
-//     scanf("%d", &miesto);
-//     Zaznam *akt = (Zaznam *)malloc(sizeof(Zaznam));
-//     akt = *zaz;
-//     int index = 1;
-//     int prov = 0;
-//     Zaznam novyZaznam;
-//     Zaznam *zap;
-    
-//     scanf("%5s %16s %2s %lf %4s %d", novyZaznam.id, novyZaznam.poz, novyZaznam.typ, &novyZaznam.hod, novyZaznam.cas, &novyZaznam.datum);
-//     while (akt!= NULL) {
-//         if (index == miesto) {
-//             prov = 1;
-//             zap = akt;
-//             akt = novyZaznam;
-//             akt = akt->dalsi;
-//         }
-        
-//         if (prov == 1) {
-//             break;
-//         }
-//         akt = akt->dalsi;
-//         index++;
-//     }
-// }
+void novy_zaznam(Zaznam **zaz, int *pocet_zaznamov) {
+    int miesto;
+    scanf("%d", &miesto);
+    if (miesto > (*pocet_zaznamov)) {
+        miesto = (*pocet_zaznamov) + 1;
+    }
+    int index = 1;
+    int prov = 0;
+    Zaznam *novyZaznam = (Zaznam *)malloc(sizeof(Zaznam));
+    scanf("%5s %16s %2s %lf %4s %d", novyZaznam->id, novyZaznam->poz, novyZaznam->typ, &novyZaznam->hod, novyZaznam->cas, &novyZaznam->datum);
+    printf("%s\n", novyZaznam->id);
+    printf("%s\n", novyZaznam->poz);
+    printf("%s\n", novyZaznam->typ);
+    printf("%lf\n", novyZaznam->hod);
+    printf("%s\n", novyZaznam->cas);
+    printf("%d\n", novyZaznam->datum);
+    novyZaznam->dalsi = NULL;
+    if (miesto == 1) {
+        novyZaznam->dalsi = *zaz;
+        *zaz = novyZaznam;
+    } else {
+        Zaznam *akt = (*zaz);
+        while (akt != NULL) {
+            if (index == miesto - 1) {
+                prov = 1;
+                novyZaznam->dalsi = akt->dalsi;
+                akt->dalsi = novyZaznam;
+                break;
+            }
+            akt = akt->dalsi;
+            index++;
+        }
+    }
+    (*pocet_zaznamov)++;
+    printf("Nový záznam bol vytvorený\n");
+}
 
 void uvolnit_zaznamy(Zaznam **zaz) {
     Zaznam *akt;
@@ -115,7 +125,8 @@ int main() {
                 vypis_zaznamov(zaz);
                 break;
             case 'p':
-                // novy_zaznam(&zaz, &pocet_zaznamov);
+                novy_zaznam(&zaz, &pocet_zaznamov);
+                break;
             case '0':
                 uvolnit_zaznamy(&zaz);
                 break;
