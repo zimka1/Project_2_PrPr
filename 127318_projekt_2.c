@@ -14,6 +14,16 @@ typedef struct Zaznam {
     struct Zaznam *dalsi; // Ukazovateľ na ďalší záznam
 } Zaznam;
 
+void uvolnit_zaznamy(Zaznam **zaz) {
+    Zaznam *akt;
+    while (*zaz != NULL) {
+        akt = *zaz;
+        *zaz = (*zaz)->dalsi;
+        free(akt);
+    }
+}
+
+
 void nacitanie(FILE **dataloger, Zaznam **zaz, int *pocet_zaznamov) {
     
     *dataloger = fopen("dataloger_V2.txt", "r");
@@ -163,7 +173,6 @@ Zaznam* usporiadanie(Zaznam *akt) {
     return spojenie(akt, druhy);
 }
 
-
 void usporiadanie_zaznamov(Zaznam **zaz, int *pocet_zaznamov){
     if (zaz != NULL && *zaz != NULL){
         *zaz = usporiadanie(*zaz);
@@ -171,15 +180,115 @@ void usporiadanie_zaznamov(Zaznam **zaz, int *pocet_zaznamov){
     }
 }
 
-
-void uvolnit_zaznamy(Zaznam **zaz) {
-    Zaznam *akt;
-    while (*zaz != NULL) {
-        akt = *zaz;
-        *zaz = (*zaz)->dalsi;
-        free(akt);
-    }
+void swap(int *a, int *b)
+{
+    int temp = *a;
+    *a = *b;
+    *b = temp;
 }
+
+Zaznam* probeh(Zaznam *akt, int k, int pocet_zaznamov) {
+    for (int i = 1; i <= pocet_zaznamov; i++){
+        if (i == k){
+            return akt;
+        }
+        akt = akt->dalsi;
+    }
+    return NULL;
+}
+void zamena(Zaznam **zaz, Zaznam *zap, Zaznam *zap_old, int k, int pocet_zaznamov) {
+    Zaznam *akt = *zaz;
+    Zaznam **pred = NULL;
+    if (k == 1){
+        *zaz = zap;
+        (*zaz)->dalsi = zap_old;
+        return;
+    }
+    for (int i = 1; i < k - 1 && akt != NULL; i++) {
+        akt = akt->dalsi;
+    }
+   
+    if (akt == NULL) {
+        return;
+    } 
+    akt->dalsi = zap; 
+    akt->dalsi->dalsi = zap_old;
+}
+
+
+
+void zmena_zaznamov(Zaznam **zaz, int pocet_zaznamov) {
+    int c1, c2;
+    scanf("%d %d", &c1, &c2);
+
+    if (c1 <= 0 || c2 <= 0 || c1 > pocet_zaznamov || c2 > pocet_zaznamov || c1 == c2) {
+        return;
+    }
+
+    if (c1 > c2) {
+        swap(&c1, &c2);
+    }
+
+    Zaznam *zap1 = probeh(*zaz, c1, pocet_zaznamov);
+    Zaznam *zap2 = probeh(*zaz, c2, pocet_zaznamov);
+
+    if (c1 == c2 - 1){
+        if (c1 == 1){
+            Zaznam *temp;
+            zap1->dalsi = zap2->dalsi;
+            temp = NULL;
+            temp = zap2;
+            temp->dalsi = zap1;
+            *zaz = temp;
+            return;
+        }
+        Zaznam *temp;
+        zap1->dalsi = zap2->dalsi;
+        temp = NULL;
+        temp = zap2;
+        temp->dalsi = zap1;
+        printf("%s\n", temp->dalsi->poz);
+        Zaznam *akt = *zaz;
+        for (int i = 1; i < c1 - 1 && akt!= NULL; i++){
+            akt = akt->dalsi;
+        }
+        printf("%s\n", akt->poz);
+        if (akt == NULL) {
+            return;
+        }
+        akt->dalsi = temp;
+        return;
+    }
+
+ 
+
+    printf("%s\n", zap1->poz);
+    printf("%s\n", zap2->poz);
+
+    if (zap1 == NULL || zap2 == NULL) {
+        return; // Один из узлов не найден
+    }
+
+    Zaznam *zap1_old_next = zap1->dalsi;
+    Zaznam *zap2_old_next = zap2->dalsi;
+
+    // if (c1 == 1){
+    //     Zaznam *temp;
+    //     temp = (*zaz)->dalsi;
+    //     (*zaz) = zap2;
+    //     (*zaz)->dalsi = temp;
+    //     zamena(zaz, zap1, zap2_old_next, c2, pocet_zaznamov);
+    // }
+
+    zamena(zaz, zap1, zap2_old_next, c2, pocet_zaznamov); // Вставляем zap1 на новое место
+
+    zamena(zaz, zap2, zap1_old_next, c1, pocet_zaznamov); // Вставляем zap2 на новое место
+
+    // Вывод списка для проверки
+    vypis_zaznamov(*zaz);
+   
+}
+
 
 int main() {
     FILE *dataloger;
@@ -205,6 +314,9 @@ int main() {
                 break;
             case 'u':
                 usporiadanie_zaznamov(&zaz, &pocet_zaznamov);
+                break;
+            case 'r':
+                zmena_zaznamov(&zaz, pocet_zaznamov);
                 break;
             case '0':
                 uvolnit_zaznamy(&zaz);
