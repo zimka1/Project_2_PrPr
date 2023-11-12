@@ -272,14 +272,6 @@ void zmena_zaznamov(Zaznam **zaz, int pocet_zaznamov) {
     Zaznam *zap1_old_next = zap1->dalsi;
     Zaznam *zap2_old_next = zap2->dalsi;
 
-    // if (c1 == 1){
-    //     Zaznam *temp;
-    //     temp = (*zaz)->dalsi;
-    //     (*zaz) = zap2;
-    //     (*zaz)->dalsi = temp;
-    //     zamena(zaz, zap1, zap2_old_next, c2, pocet_zaznamov);
-    // }
-
     zamena(zaz, zap1, zap2_old_next, c2, pocet_zaznamov); // Вставляем zap1 на новое место
 
     zamena(zaz, zap2, zap1_old_next, c1, pocet_zaznamov); // Вставляем zap2 на новое место
@@ -321,10 +313,14 @@ int main() {
             case '0':
                 uvolnit_zaznamy(&zaz);
                 break;
+            case'k':
+                uvolnit_zaznamy(&zaz);
+                return 0;
+                break;
             default:
                 printf("Neznamy prikaz!\n");
         }
-    } while (command != '0');
+    } while (command != 'k');
 
     return 0;
 }
