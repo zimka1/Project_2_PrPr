@@ -58,6 +58,8 @@ void nacitanie(FILE **dataloger, Zaznam **zaz, int *pocet_zaznamov)
     // Postupne načítavame záznamy zo súboru, pokiaľ nedôjdeme na koniec súboru
     while (!feof(*dataloger))
     {
+        char dollar[4];
+        fscanf(*dataloger, "%3s", dollar);
         // Alokujeme pamäť pre nový záznam
         akt = (Zaznam *)malloc(sizeof(Zaznam));
         char ID_norm[6];
@@ -151,7 +153,7 @@ void vypis_zaznamov(Zaznam *zaz)
     while (akt != NULL)
     {
         printf("%d:\n", index);
-        printf("ID: %c%d%c\t%s\t%2lf\n", akt->id.oznacenie, akt->id.cislovanie, akt->id.druh, akt->typ, akt->hod);
+        printf("ID: %c%d%c\t%s\t%.2lf\n", akt->id.oznacenie, akt->id.cislovanie, akt->id.druh, akt->typ, akt->hod);
 
         // Kontrola znamienka pre súradnicu latitude
         if (akt->poz.latitude > 0)
@@ -555,6 +557,7 @@ void zmena_zaznamov(Zaznam **zaz, int pocet_zaznamov)
 
 int main()
 {
+    
     FILE *dataloger;
     Zaznam *zaz = NULL;
     int pocet_zaznamov = 0;
@@ -583,9 +586,6 @@ int main()
             break;
         case 'r':
             zmena_zaznamov(&zaz, pocet_zaznamov);
-            break;
-        case '0':
-            uvolnit_zaznamy(&zaz);
             break;
         case 'k':
             uvolnit_zaznamy(&zaz);
